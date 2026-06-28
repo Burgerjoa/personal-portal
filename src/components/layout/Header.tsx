@@ -1,23 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Menu, X, Code2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Sun, Moon, Code2, LayoutGrid, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
-const NAV_ITEMS = [
-  { label: "Blog", href: "/blog" },
-  { label: "Tools", href: "/tools" },
-  { label: "Projects", href: "/projects" },
+const SITE_MAP = [
+  {
+    label: "Blog",
+    href: "/blog",
+    desc: "기술 블로그",
+    emoji: "✍️",
+  },
+  {
+    label: "Tools",
+    href: "/tools",
+    desc: "웹 유틸리티",
+    emoji: "🔧",
+  },
+  {
+    label: "Projects",
+    href: "/projects",
+    desc: "포트폴리오",
+    emoji: "🚀",
+  },
 ];
 
 export function Header() {
-  const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -26,9 +40,19 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? "border-b border-border bg-background/80 backdrop-blur-md"
           : "bg-transparent"
@@ -37,30 +61,11 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
         <Link
           href="/"
-          className="flex items-center gap-2 font-bold text-lg tracking-tight hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 font-bold text-lg tracking-tight hover:opacity-70 transition-opacity"
         >
-          <Code2 className="h-5 w-5 text-primary" />
+          <Code2 className="h-5 w-5" />
           <span>burgerjoa</span>
         </Link>
-
-        <nav className="hidden md:flex items-center gap-1">
-          {NAV_ITEMS.map(({ label, href }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`relative px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                pathname === href || pathname.startsWith(href + "/")
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {(pathname === href || pathname.startsWith(href + "/")) && (
-                <span className="absolute inset-0 rounded-md bg-muted" />
-              )}
-              <span className="relative">{label}</span>
-            </Link>
-          ))}
-        </nav>
 
         <div className="flex items-center gap-2">
           <button
@@ -79,34 +84,52 @@ export function Header() {
             )}
           </button>
 
-          <button
-            className="flex md:hidden h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="메뉴"
-          >
-            {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              className="flex items-center gap-1.5 h-9 px-3 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              aria-label="사이트맵"
+            >
+              {menuOpen ? (
+                <X className="h-4 w-4" />
+              ) : (
+                <LayoutGrid className="h-4 w-4" />
+              )}
+              <span className="hidden sm:inline">Menu</span>
+            </button>
+
+            {menuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-border bg-background/95 backdrop-blur-md shadow-xl overflow-hidden">
+                <div className="px-3 py-2 border-b border-border">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    사이트맵
+                  </p>
+                </div>
+                <div className="p-2 flex flex-col gap-1">
+                  {SITE_MAP.map(({ label, href, desc, emoji }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-muted transition-colors group"
+                    >
+                      <span className="text-lg">{emoji}</span>
+                      <div>
+                        <p className="text-sm font-medium text-foreground leading-none">
+                          {label}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {desc}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-
-      {menuOpen && (
-        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md px-6 py-4 flex flex-col gap-1">
-          {NAV_ITEMS.map(({ label, href }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setMenuOpen(false)}
-              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                pathname === href || pathname.startsWith(href + "/")
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
-      )}
     </header>
   );
 }
