@@ -2,7 +2,7 @@
 
 > 이력서 · 기술 블로그 · 웹 유틸리티를 하나의 포털로 통합한 개인 브랜딩 사이트
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-latest-black)](https://ui.shadcn.com/)
@@ -79,6 +79,7 @@ npm run dev
 | # | 제목 |
 |---|---|
 | [ADR-001](./docs/ADR/001-tech-stack-selection.md) | 초기 기술 스택 및 아키텍처 선정 |
+| [ADR-002](./docs/ADR/002-own-site-tool-migration.md) | `own_site` 도구 통합 방식 |
 
 ---
 
@@ -99,4 +100,3 @@ personal-portal/
 │   └── ADR/                # Architecture Decision Records
 ├── public/                 # 정적 에셋
 ```
-
