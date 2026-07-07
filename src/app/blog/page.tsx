@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   description: "만들며 알게 된 것과 오래 기억하고 싶은 결정을 남기는 기록.",
 };
 
-export default function BlogPage() {
-  const posts = getAllPosts();
+export default async function BlogPage() {
+  const posts = await getAllPosts();
   const [featured, ...rest] = posts;
 
   return (

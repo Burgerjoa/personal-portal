@@ -1,13 +1,6 @@
+import fs from "fs";
+import path from "path";
 import type { ComponentType } from "react";
-import MovingOldTools, {
-  metadata as movingOldToolsMetadata,
-} from "@/content/blog/moving-old-tools.mdx";
-import LessPortfolioMoreHome, {
-  metadata as lessPortfolioMoreHomeMetadata,
-} from "@/content/blog/less-portfolio-more-home.mdx";
-import WhyLocalMdx, {
-  metadata as whyLocalMdxMetadata,
-} from "@/content/blog/why-local-mdx.mdx";
 
 export type PostMetadata = {
   title: string;
@@ -22,29 +15,29 @@ export type Post = PostMetadata & {
   Content: ComponentType;
 };
 
-const posts: Post[] = [
-  {
-    slug: "moving-old-tools",
-    ...movingOldToolsMetadata,
-    Content: MovingOldTools,
-  },
-  {
-    slug: "less-portfolio-more-home",
-    ...lessPortfolioMoreHomeMetadata,
-    Content: LessPortfolioMoreHome,
-  },
-  {
-    slug: "why-local-mdx",
-    ...whyLocalMdxMetadata,
-    Content: WhyLocalMdx,
-  },
-].sort((a, b) => b.date.localeCompare(a.date));
+export async function getAllPosts(): Promise<Post[]> {
+  const blogDir = path.join(process.cwd(), "src/content/blog");
+  const files = fs.readdirSync(blogDir);
 
-export function getAllPosts() {
-  return posts;
+  const posts = await Promise.all(
+    files
+      .filter((file) => file.endsWith(".mdx"))
+      .map(async (file) => {
+        const slug = file.replace(/\.mdx$/, "");
+        const { metadata, default: Content } = await import(`@/content/blog/${file}`);
+        return {
+          slug,
+          ...metadata,
+          Content,
+        };
+      })
+  );
+
+  return posts.sort((a, b) => b.date.localeCompare(a.date));
 }
 
-export function getPost(slug: string) {
+export async function getPost(slug: string): Promise<Post | undefined> {
+  const posts = await getAllPosts();
   return posts.find((post) => post.slug === slug);
 }
 

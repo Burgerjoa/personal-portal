@@ -10,12 +10,12 @@ type Props = {
 
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
+export async function generateStaticParams() {
+  return (await getAllPosts()).map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = getPost((await params).slug);
+  const post = await getPost((await params).slug);
 
   if (!post) return {};
 
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const posts = getAllPosts();
+  const posts = await getAllPosts();
   const postIndex = posts.findIndex((item) => item.slug === slug);
   const post = posts[postIndex];
 
@@ -104,7 +104,7 @@ function PostLink({
   post,
   direction,
 }: {
-  post: ReturnType<typeof getAllPosts>[number];
+  post: Awaited<ReturnType<typeof getAllPosts>>[number];
   direction: "newer" | "older";
 }) {
   const isNewer = direction === "newer";
